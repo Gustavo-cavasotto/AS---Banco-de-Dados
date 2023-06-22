@@ -1,0 +1,21 @@
+[
+    {
+      "_id": 1,
+      "nome": "Margherita",
+      "tamanho": "pequena",
+      "preco": 25.0
+    },
+    {
+      "_id": 2,
+      "nome": "Calabresa",
+      "tamanho": "média",
+      "preco": 30.0
+    },
+    {
+      "_id": 3,
+      "nome": "Quatro Queijos",
+      "tamanho": "grande",
+      "preco": 35.0
+    }
+  ]
+  

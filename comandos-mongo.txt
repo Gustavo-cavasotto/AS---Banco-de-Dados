@@ -1,0 +1,166 @@
+3 - Criando as coleções e inserindo os dados:
+
+    db.createCollection("pizzas")
+    db.pizzas.insertMany([
+        {
+        "_id": 1,
+        "nome": "Margherita",
+        "tamanho": "pequena",
+        "preco": 25.0
+        },
+        {
+        "_id": 2,
+        "nome": "Calabresa",
+        "tamanho": "média",
+        "preco": 30.0
+        },
+        {
+        "_id": 3,
+        "nome": "Quatro Queijos",
+        "tamanho": "grande",
+        "preco": 35.0
+        }
+    ])
+
+    db.createCollection("clientes")
+    db.clientes.insertMany([
+    {
+        "_id": 1,
+        "nome": "João da Silva",
+        "endereco": "Rua A, 123",
+        "telefone": "987654321"
+    },
+    {
+        "_id": 2,
+        "nome": "Maria Souza",
+        "endereco": "Av. B, 456",
+        "telefone": "123456789"
+    }
+    ])
+
+    db.createCollection("pedidos")
+    db.pedidos.insertMany([
+        {
+        "_id": 1,
+        "cliente_id": 1,
+        "tipo": "entrega",
+        "endereco_entrega": "Rua A, 123",
+        "itens": [
+            {
+            "pizza_id": 1,
+            "quantidade": 2
+            },
+            {
+            "pizza_id": 3,
+            "quantidade": 1
+            }
+        ],
+        "total": 85.0
+        },
+        {
+        "_id": 2,
+        "cliente_id": 2,
+        "tipo": "local",
+        "numero_mesa": 4,
+        "itens": [
+            {
+            "pizza_id": 2,
+            "quantidade": 1
+            }
+        ],
+        "total": 30.0
+        }
+    ])
+
+
+4 - Efetuando updates e exclusões:
+
+    db.pizzas.updateOne(
+    { "_id": 1 },
+    { $set: { "preco": 30.0 } }
+    )
+
+    db.pedidos.updateOne(
+    { "_id": 1 },
+    { $push: { "itens": { "pizza_id": 2, "quantidade": 3 } } }
+    )
+
+    db.pizzas.deleteOne({ "_id": 3 })
+
+5 - Efetuando consultas simples e com condições
+
+    db.pizzas.find()
+    db.clientes.find()
+    db.pedidos.find()
+
+    Com condições:
+
+    pizzas com preço menor que 30.0
+    db.pizzas.find({ "preco": { $lt: 30.0 } })
+
+    db.clientes.find({ "nome": "João da Silva" })
+
+    db.pedidos.find({ "tipo": "entrega" })
+
+
+6 - Consulta com Join:
+
+    db.pedidos.aggregate([
+    {
+        $lookup: {
+        from: "clientes",
+        localField: "cliente_id",
+        foreignField: "_id",
+        as: "cliente"
+        }
+    }
+    ])
+
+    * esse comando comando ai irá realizar um join entre as coleções pedidos e clientes com base no campo 
+    cliente_id em pedidos e _id em clientes, retornando os documentos de pedidos com um novo campo cliente mostrando 
+    os dado do cliente
+
+Consulta com Group By:
+
+    Se quisermos saber o total de pizzas vendidas por tamanho:
+
+    db.pedidos.aggregate([
+    {
+        $unwind: "$itens"
+    },
+    {
+        $lookup: {
+        from: "pizzas",
+        localField: "itens.pizza_id",
+        foreignField: "_id",
+        as: "pizza"
+        }
+    },
+    {
+        $group: {
+        _id: "$pizza.tamanho",
+        quantidade_total: { $sum: "$itens.quantidade" }
+        }
+    }
+    ])
+
+
+7- Criação de indexes:
+
+    7.1 - Índice na coleção "pizzas" pelo campo "preco":
+
+    db.pizzas.createIndex({ "preco": 1 })
+
+    Justificativa: Esse índice é útil para consultas que envolvam filtragem ou ordenação por preço das pizzas. Ele permite que o 
+    MongoDB localize rapidamente os documentos com base no valor do campo "preco".
+
+
+    7.2 - Índice na coleção "pedidos" pelo campo "cliente_id":
+
+    db.pedidos.createIndex({ "cliente_id": 1 })
+
+    Justificativa: Esse índice é útil para consultas que envolvam filtragem ou junção (join) entre as coleções "pedidos" e 
+    "clientes" com base no campo "cliente_id". Ele melhora o desempenho das consultas ao permitir uma busca eficiente pelos 
+    pedidos de um cliente específico.
+
+
